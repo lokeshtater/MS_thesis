@@ -17,14 +17,11 @@ init = stagg
 
 D = np.empty((N, N), dtype=complex)
 F = np.empty((N, N, N, N), dtype=complex)
-
 for m in range(N):
     for n in range(N):
         D[m,n] = expect(a[m].dag()*a[n],init)
         for p in range(N):
             for q in range(N):
-                F[m,n,p,q] = expect(a[m].dag()*a[n].dag()*a[p]*a[q],init)
-        
-        
+                F[m,n,p,q] = expect(a[m].dag()*a[n].dag()*a[p]*a[q],init)   
 
 
