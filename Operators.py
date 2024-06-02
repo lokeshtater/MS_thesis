@@ -11,6 +11,7 @@ def single_destruct(m,N):
 
     return tensor(site_ops)
 
+#returns a site ordered list of annihilation operators: 
 def annihilation(N):
     return [single_destruct(i,N) for i in range(N)]
 
