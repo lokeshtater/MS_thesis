@@ -36,7 +36,9 @@ for i in range(N):
     for j in range(N):
         if(i==j):
             Id[i][j] = 1.0 #also defining identity matrix
-        if (i==((j+1)%N)):
+
+        #This is for tight binding, changes for long range hopping
+        if (i==((j+1)%N)): 
             A[i][j] = -1.0j
 
 B = -A
