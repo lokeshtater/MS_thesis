@@ -60,8 +60,8 @@ y0 = D0
 evol_matrix = D_evol
 
 
-def ode_func(t,y): #function to define ODE
-    return np.dot(evol_matrix,y)
+def ode_equation(t,y,matrix): #function to define ODE
+    return np.dot(matrix,y)
     
     
 t_span = (0,10**5)
@@ -71,7 +71,7 @@ t_span = (0,10**5)
 print("Solving ODE...")
 #solve ODE
 start_time = time.time()
-solution = solve_ivp(ode_func, t_span, y0, t_eval=t_eval, args=(evol_matrix,))
+solution = solve_ivp(ode_equation, t_span, y0, t_eval=np.linspace(*t_span,100), args=(evol_matrix,))
 end_time = time.time()
 print(f"ODE solved. Time taken:{end_time-start_time}")
 
