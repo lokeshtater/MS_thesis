@@ -1,39 +1,29 @@
-import numpy as np
-import pandas as pd
+import numpy as np #basic packages
 import time
 from scipy.linalg import expm
 import cmath
 
-from qutip import *
+from concurrent.futures import ProcessPoolExecutor, as_completed #to compute evolution in parellel
 
+import pandas as pd 
 
-import Operators
+N = 100 #number of lattice sites, sites labelled from 0 to N-1
 
-
-N = 12 #number of lattice sites, sites labelled from 0 to N-1
-a = Operators.annihilation(N) #list of single site annihilation operators for lattice of size N
-vacc =  tensor([basis(2,0) for i in range(N)]) #vaccum state
-
-
-#defining pure initial staggered state
-stagg = vacc
-for i in range(N):
-    if (i+1)%2==0:  #all odd sites filled
-        stagg = a[i].dag() * stagg
-
-init = stagg
-
-D0 = np.empty(N**2,dtype=complex)
-F0 = np.empty(N**4,dtype=complex)
 
 #initial states for 2-point and 4-point correlator vectors:
+
+D0 = np.zeros(N**2,dtype=complex) #vector to store initial state
+#F0 = np.zeros(N**4,dtype=complex)
+
 for n in range(N):
     for m in range(N):
-        D0[N*n + m] = expect(a[m].dag()*a[n],init) 
-        for p in range(N):
-            for q in range(N):
-                F0[q*N**3 + p*N**2 + n*N + m] = expect(a[m].dag()*a[n].dag()*a[p]*a[q],init)
+        if(n==m):
+            if((n+1)%2==0):
+                D0[N*n + m] = 1.0 + 0.0j     #alternating pure state 
+                #F0[n*N**3 + m*N**2 + n*N + m] = 
 
+
+        
 print("Initial State Defined")
 
 #defining evolution matrices for 2-point and 4-point correlator vectors:
@@ -43,39 +33,41 @@ Id = np.zeros((N,N),dtype=complex)
 for i in range(N):
     for j in range(N):
         if(i==j):  Id[i][j] = 1.0 #also defining identity matrix
-        if (i==((j+1)%N) | i==((j-1)%N) ):  A[i][j] = -1.0j
-       
+        if (abs(i-j)==1):  A[i][j] = -1.0j
+
+A[0][N-1] = A[N-1][0] = -1.0j #periodicity of lattice
 
 B = -A
 
-#Evolution
-T = 10**6 #time upto which we evolve
-times = np.linspace(0,int(T),100)
+
+#Evolution######
+#################
+
+T = 3 #evolution will be computed for times 10^-T to 10^T
+times = [(10**i) for i in np.linspace(-T,+T,100)]
 
 
-D = np.empty((len(times),int(N**2)),dtype=complex)
-F = np.empty((len(times),int(N**4)),dtype=complex)
+D = np.zeros((len(times),int(N**2)),dtype=complex)
+#F = np.zeros((len(times),int(N**4)),dtype=complex)
+
 
 for i in range(len(times)):
     start = time.time()
-    t = times[i]
-    D[i] = np.dot(np.kron(expm(B*t),expm(A*t)),D0)
-    F[i] = np.dot(np.kron(expm(B*t),np.kron(expm(B*t),np.kron(expm(A*t),expm(A*t)))),F0)
-    
+    if (i>0):
+        t = times[i]
+        D[i] = np.dot(np.kron(expm(B*t),expm(A*t)),D0)
+        #F[i] = np.dot(np.kron(expm(B*t),np.kron(expm(B*t),np.kron(expm(A*t),expm(A*t)))),F[i-1])
+        
+        
     end = time.time()
-    print(f"iteration:{i} time:{t}  time taken:{end-start} seconds")
+    print(f"iteration:{i}  time taken:{end-start} seconds")
 
     
 df1 = pd.DataFrame(data=D, index=times)
 df1.index.name = 'time'
-
-df2 = pd.DataFrame(data=F, index=times)
-df2.index.name = 'time'
-
-# Save the DataFrame to a CSV file
 df1.to_csv('./data_SR/alt_d.csv')
-df2.to_csv('./data_SR/alt_f.csv')
 
+
+print(df1.head())
 print("DONE!")
-#print(df.head())  # Print the first few rows to verify
 
