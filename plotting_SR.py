@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-data_2_pt = np.genfromtxt('./data_SR/alt_d.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
+data_2_pt = np.genfromtxt('./data_SR/tight_binding/2_pt_alt_75_sites.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
 #data_4_pt = np.genfromtxt('./data_SR/alt_f.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
 
 
@@ -55,17 +55,57 @@ T = range(len(time))
 
 #w = [(-F_mnmn[t]+D_mm[t]-(D_mm[t]**2)) for t in T] #SR in terms of summations of 2 and 4 pt. correlators (general expression)
 
-w = [(D_mm[t]-D_mn_sq[t]) for t in T] #SR in terms of summations of 2_pt correlators, when Wick's thm holds true
+w_sq = [(D_mm[t]-D_mn_sq[t]) for t in T] #SR in terms of summations of 2_pt correlators, when Wick's thm holds true
+
+
+
+#fitting
+
+#first linear region: #region chosen visually and is t<<1/J
+###############################
+t1 = 10**(-3)
+t2 = 10**(-1) 
+
+time_1 = [t for t in time if t1<t<t2]
+
+log_t = np.log10(time_1)
+indices = [i for i,t in enumerate(time) if t1<t<t2]
+log_w_sq = np.log10([w_sq[i] for i in indices])
+
+beta1 = np.polyfit(log_t,log_w_sq,1)[0] #fitting log(w^2) against log(t)
+
+w_sq_fit1 = [t**beta1 for t in time_1]
+
+#second linear region: #region chosen visually and is t~1/J
+###############################
+t1 = 10**(0)
+t2 = 10**(1) 
+
+time_2 = [t for t in time if t1<t<t2]
+
+log_t = np.log10(time_2)
+indices = [i for i,t in enumerate(time) if t1<t<t2]
+log_w_sq = np.log10([w_sq[i] for i in indices])
+
+beta2 = np.polyfit(log_t,log_w_sq,1)[0] #fitting log(w^2) against log(t)
+
+w_sq_fit2 = [t**beta2 for t in time_2]
 
 
 ##Plotting####
 
-plt.plot(time,w, marker='o', linestyle='-', color='r', label='w')
+plt.plot(time,w_sq, marker='o', linestyle='-', color='r', label=f'N={N}') #raw data
+plt.plot(time_1,w_sq_fit1, linestyle='-', color='b', label=fr"$t^{{{round(beta1,3)}}}$") #fit of region1 (t<<1/J)
+plt.plot(time_2,w_sq_fit2, linestyle='-', color='g', label=fr"$t^{{{round(beta2,3)}}}$") #fit of region2 (t~1/J)
+
+
+
 plt.xscale('log',base=10)
+plt.yscale('log',base=10)
 
-
-plt.xlabel('time')
-plt.title('')
+plt.xlabel('Jt (J = nearest neighbour hopping stregth)')
+plt.ylabel(r"Bipartite particle number fluctuations")
+plt.title('Free fermions, tight binding, periodic boundary conditions')
 
 plt.legend()
 plt.show()
