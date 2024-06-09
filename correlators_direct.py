@@ -2,12 +2,9 @@ import numpy as np #basic packages
 import time
 from scipy.linalg import expm
 import cmath
-
-from concurrent.futures import ProcessPoolExecutor, as_completed #to compute evolution in parellel
-
 import pandas as pd 
 
-N = 100 #number of lattice sites, sites labelled from 0 to N-1
+N = 125 #number of lattice sites, sites labelled from 0 to N-1
 
 
 #initial states for 2-point and 4-point correlator vectors:
@@ -53,10 +50,10 @@ D = np.zeros((len(times),int(N**2)),dtype=complex)
 
 for i in range(len(times)):
     start = time.time()
-    if (i>0):
-        t = times[i]
-        D[i] = np.dot(np.kron(expm(B*t),expm(A*t)),D0)
-        #F[i] = np.dot(np.kron(expm(B*t),np.kron(expm(B*t),np.kron(expm(A*t),expm(A*t)))),F[i-1])
+    
+    t = times[i]
+    D[i] = np.dot(np.kron(expm(B*t),expm(A*t)),D0)
+    #F[i] = np.dot(np.kron(expm(B*t),np.kron(expm(B*t),np.kron(expm(A*t),expm(A*t)))),F[i-1])
         
         
     end = time.time()
@@ -65,7 +62,7 @@ for i in range(len(times)):
     
 df1 = pd.DataFrame(data=D, index=times)
 df1.index.name = 'time'
-df1.to_csv('./data_SR/alt_d.csv')
+df1.to_csv('./data_SR/tight_binding/2_pt_alt_125_sites.csv')
 
 
 print(df1.head())
