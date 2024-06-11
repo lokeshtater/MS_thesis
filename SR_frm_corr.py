@@ -3,7 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 
-data_2_pt = np.genfromtxt('./data_SR/tight_binding/2_pt_alt_100_sites.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
+data_2_pt = np.genfromtxt('./data_SR/long_hopping/2_pt_alt_125_sites.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
 #data_4_pt = np.genfromtxt('./data_SR/alt_f.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
 
 
@@ -26,14 +26,14 @@ for n in M:
 
 
 #arrays to store time ordered data- \sum_{m,n \in M} D_mm(t), F_mnmn(t), |D_mn(t)|^2
-time = []
+times = []
 D_mm = []
 #F_mnmn = []
 D_mn_sq = []
 
 
 for row in data_2_pt:
-    time.append(row[0])
+    times.append(row[0])
     
     d_mm = 0.0 + 0.0j
     d_mn_sq = 0.0 + 0.0j
@@ -51,7 +51,7 @@ for row in data_2_pt:
 #     for i in diag_F: f_mm = f_mm + row[i]
 #     F_mnmn.append(f_mm) 
 
-T = range(len(time))
+T = range(len(times))
 
 #w = [(-F_mnmn[t]+D_mm[t]-(D_mm[t]**2)) for t in T] #SR in terms of summations of 2 and 4 pt. correlators (general expression)
 
@@ -60,9 +60,10 @@ w_sq = [(D_mm[t]-D_mn_sq[t]) for t in T] #SR in terms of summations of 2_pt corr
 
 #saving SR into file:
 
-filename = "data_SR/tight_binding/SR_alt_100_sites.csv"
+filename = f"data_SR/long_hopping/SR_alt_{N}_sites.csv"
 
-df = pd.DataFrame(w_sq)
-df.to_csv(filename,index=False)
+df = pd.DataFrame(w_sq,index=times)
+df.index.name = "times"
+df.to_csv(filename)
 
 
