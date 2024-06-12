@@ -2,8 +2,13 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import pandas as pd
+import sys
 
-data_2_pt = np.genfromtxt('./data_SR/long_hopping/2_pt_alt_125_sites.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
+N=sys.argv[1]
+system=sys.argv[2]
+state=sys.argv[3]
+
+data_2_pt = np.genfromtxt(f'./data_SR/{system}/2_pt_{state}_{N}_sites.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
 #data_4_pt = np.genfromtxt('./data_SR/alt_f.csv', delimiter=',', dtype=complex, skip_header=1) #each row contains data for one time-point
 
 
@@ -60,7 +65,7 @@ w_sq = [(D_mm[t]-D_mn_sq[t]) for t in T] #SR in terms of summations of 2_pt corr
 
 #saving SR into file:
 
-filename = f"data_SR/long_hopping/SR_alt_{N}_sites.csv"
+filename = f"data_SR/{system}/SR_{state}_{N}_sites.csv"
 
 df = pd.DataFrame(w_sq,index=times)
 df.index.name = "times"
